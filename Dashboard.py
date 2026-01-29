@@ -1,108 +1,126 @@
 import os
 import subprocess
+from abc import ABC, abstractmethod
 
-class MenuBase:
-    """Clase base para todos los menús (Abstracción)."""
-    def __init__(self, titulo):
-        self.titulo = titulo
+# --- PATRÓN STRATEGY PARA EJECUCIÓN ---
+class EstrategiaEjecucion(ABC):
+    @abstractmethod
+    def ejecutar(self, ruta):
+        pass
 
-    def mostrar_encabezado(self):
-        print(f"\n{'='*30}")
-        print(f" {self.titulo.upper()} ")
-        print(f"{'='*30}")
-
-    def obtener_opcion(self, max_opc):
+class EjecutorPython(EstrategiaEjecucion):
+    def ejecutar(self, ruta):
+        print(f"\n>>> Iniciando ejecución de: {os.path.basename(ruta)}")
         try:
-            opc = int(input(f"\nSeleccione una opción (0-{max_opc}): "))
-            return opc if 0 <= opc <= max_opc else -1
-        except ValueError:
-            return -1
+            if os.name == 'nt':
+                subprocess.Popen(['cmd', '/k', 'python', ruta])
+            else:
+                subprocess.run(['python3', ruta], check=True)
+        except Exception as e:
+            print(f"Error en la ejecución: {e}")
 
-class MenuPrincipal(MenuBase):
-    """Menú principal que hereda de MenuBase."""
-    def __init__(self, unidades, ruta_base):
-        super().__init__("Dashboard POO v3 (Herencia)")
-        self.unidades = unidades
-        self.ruta_base = ruta_base
-
-    def ejecutar(self):
-        while True:
-            self.mostrar_encabezado()
-            opciones = list(self.unidades.values())
-            for i, unidad in enumerate(opciones, 1):
-                print(f"{i}. {unidad}")
-            print("0. Salir")
-            
-            opc = self.obtener_opcion(len(opciones))
-            if opc == 0: break
-            if opc > 0:
-                ruta = os.path.join(self.ruta_base, opciones[opc-1])
-                if os.path.exists(ruta):
-                    MenuSubcarpeta(opciones[opc-1], ruta).ejecutar()
-                else:
-                    print(f"Error: No se encontró la ruta {ruta}")
-
-class MenuSubcarpeta(MenuBase):
-    """Menú de subcarpetas."""
-    def __init__(self, nombre, ruta):
-        super().__init__(nombre)
+# --- CLASE DE DATOS PARA SCRIPTS ---
+class ScriptPython:
+    def __init__(self, ruta):
         self.ruta = ruta
+        self.nombre = os.path.basename(ruta)
 
-    def ejecutar(self):
+    def leer_contenido(self):
+        try:
+            with open(self.ruta, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            return f"No se pudo leer el archivo: {e}"
+
+# --- COMPONENTE DE INTERFAZ (SINGLETON) ---
+class InterfazConsola:
+    _instancia = None
+
+    def __new__(cls):
+        if cls._instancia is None:
+            cls._instancia = super(InterfazConsola, cls).__new__(cls)
+        return cls._instancia
+
+    def limpiar_pantalla(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    def imprimir_menu(self, titulo, opciones):
+        print(f"\n{'*'*40}")
+        print(f"{titulo.center(40)}")
+        print(f"{'*'*40}")
+        for i, opt in enumerate(opciones, 1):
+            print(f"  [{i}] {opt}")
+        print(f"  [0] Salir/Volver")
+        print(f"{'*'*40}")
+
+    def solicitar_opcion(self, max_val):
         while True:
-            self.mostrar_encabezado()
-            # CORRECCIÓN: Verificación de existencia de ruta antes de scandir
-            if not os.path.exists(self.ruta):
-                print(f"Error: La ruta {self.ruta} no existe.")
+            try:
+                val = int(input(f"\nSeleccione una opción (0-{max_val}): "))
+                if 0 <= val <= max_val: return val
+                print("Fuera de rango.")
+            except ValueError:
+                print("Entrada inválida.")
+
+# --- CONTROLADOR PRINCIPAL ---
+class DashboardAvanzado:
+    def __init__(self, ruta_raiz):
+        self.ruta_raiz = ruta_raiz
+        self.ui = InterfazConsola()
+        self.ejecutor = EjecutorPython()
+
+    def iniciar(self):
+        while True:
+            self.ui.limpiar_pantalla()
+            if not os.path.exists(self.ruta_raiz):
+                print(f"Error: No se encuentra la ruta raíz {self.ruta_raiz}")
                 break
                 
-            carpetas = sorted([f.name for f in os.scandir(self.ruta) if f.is_dir()])
-            for i, c in enumerate(carpetas, 1):
-                print(f"{i}. {c}")
-            print("0. Volver")
+            unidades = sorted([d.name for d in os.scandir(self.ruta_raiz) if d.is_dir() and d.name.startswith('UNIDAD')])
             
-            opc = self.obtener_opcion(len(carpetas))
+            self.ui.imprimir_menu("SISTEMA DE GESTIÓN POO - V4", unidades)
+            opc = self.ui.solicitar_opcion(len(unidades))
+            
             if opc == 0: break
-            if opc > 0:
-                ruta_c = os.path.join(self.ruta, carpetas[opc-1])
-                MenuScripts(carpetas[opc-1], ruta_c).ejecutar()
+            self.gestionar_unidad(os.path.join(self.ruta_raiz, unidades[opc-1]))
 
-class MenuScripts(MenuBase):
-    """Menú final para gestión de scripts."""
-    def __init__(self, nombre, ruta):
-        super().__init__(nombre)
-        self.ruta = ruta
-
-    def ejecutar(self):
+    def gestionar_unidad(self, ruta_unidad):
         while True:
-            self.mostrar_encabezado()
-            scripts = sorted([f.name for f in os.scandir(self.ruta) if f.name.endswith('.py')])
-            for i, s in enumerate(scripts, 1):
-                print(f"{i}. {s}")
-            print("0. Volver")
+            self.ui.limpiar_pantalla()
+            carpetas = sorted([d.name for d in os.scandir(ruta_unidad) if d.is_dir()])
             
-            opc = self.obtener_opcion(len(scripts))
+            self.ui.imprimir_menu(os.path.basename(ruta_unidad), carpetas)
+            opc = self.ui.solicitar_opcion(len(carpetas))
+            
             if opc == 0: break
-            if opc > 0:
-                self.procesar_script(os.path.join(self.ruta, scripts[opc-1]))
+            self.gestionar_scripts(os.path.join(ruta_unidad, carpetas[opc-1]))
 
-    def procesar_script(self, ruta):
-        try:
-            with open(ruta, 'r', encoding='utf-8') as f:
-                print(f"\n--- CÓDIGO: {os.path.basename(ruta)} ---\n")
-                print(f.read())
+    def gestionar_scripts(self, ruta_carpeta):
+        while True:
+            self.ui.limpiar_pantalla()
+            archivos = sorted([f.name for f in os.scandir(ruta_carpeta) if f.name.endswith('.py')])
             
-            if input("\n¿Ejecutar script? (s/n): ").lower() == 's':
-                if os.name == 'nt':
-                    subprocess.Popen(['cmd', '/k', 'python', ruta])
-                else:
-                    subprocess.run(['python3', ruta])
-                input("\nPresione Enter para continuar...")
-        except Exception as e:
-            print(f"Error al procesar script: {e}")
+            self.ui.imprimir_menu(f"SCRIPTS: {os.path.basename(ruta_carpeta)}", archivos)
+            opc = self.ui.solicitar_opcion(len(archivos))
+            
+            if opc == 0: break
+            
+            script = ScriptPython(os.path.join(ruta_carpeta, archivos[opc-1]))
+            self.ver_y_ejecutar(script)
+
+    def ver_y_ejecutar(self, script):
+        self.ui.limpiar_pantalla()
+        print(f"--- VISUALIZANDO: {script.nombre} ---\n")
+        print(script.leer_contenido())
+        print("\n" + "-"*40)
+        
+        confirmar = input("\n¿Desea ejecutar este script? (s/n): ").lower()
+        if confirmar == 's':
+            self.ejecutor.ejecutar(script.ruta)
+            input("\nPresione Enter para continuar...")
 
 if __name__ == "__main__":
-    # CORRECCIÓN: Obtener ruta base dinámica
-    RUTA_BASE = os.path.dirname(os.path.abspath(__file__))
-    unidades = {'1': 'UNIDAD 1', '2': 'UNIDAD 2'}
-    MenuPrincipal(unidades, RUTA_BASE).ejecutar()
+    # CORRECCIÓN: Ruta dinámica para portabilidad
+    PATH_PROYECTO = os.path.dirname(os.path.abspath(__file__))
+    app = DashboardAvanzado(PATH_PROYECTO)
+    app.iniciar()
