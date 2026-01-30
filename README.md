@@ -1,41 +1,41 @@
-# PROGRAMACION-ORIENTADA-A-OBJETOS
-Este repositorio contiene el código fuente desarrollado durante la asignatura **Programación Orientada a Objetos**, impartida en la **Universidad Estatal Amazónica**. Está diseñado como un recurso de apoyo para estudiantes y profesionales interesados en conceptos y prácticas de programación orientada a objetos.
+# Informe de Refactorización Progresiva: Dashboard POO
+Este informe documenta la evolución del aplicativo Dashboard.py, transformándolo de un script procedimental a un sistema avanzado basado en el paradigma de Programación Orientada a Objetos (POO). La progresión se divide en cuatro etapas, integrando mejoras estructurales y soluciones de portabilidad.
 
-## Información de la asignatura
+## 1. Resumen de Versiones
 
-- **Institución**: Universidad Estatal Amazónica (UEA)  
-- **Carrera**: Ingeniería en Tecnologías de la Información  
-- **Asignatura**: Programación Orientada a Objetos  
+| Versión            	| Enfoque Técnico	        | Estado de Portabilidad	| Conceptos de POO Aplicados                 |
+|---|---|---|---|
+| V1: Clase Básica   	| Organización inicial	    | Ruta Estática	        | Encapsulamiento de funciones en una clase. |
+| V2: Modularización 	| Separación de E/S      	| Ruta Estática	        | Creación de la clase GestorArchivos (SRP). |
+| V3: Herencia       	| Reutilización de Código	| Ruta Dinámica          | Jerarquía de clases con MenuBase.          |
+| V4: Patrones de Diseño | Arquitectura Robusta   	| Ruta Dinámica          | Patrones Singleton y Strategy.             |
 
-## Contenido del repositorio
 
-Este repositorio incluye:
-1. Ejercicios prácticos de programación orientada a objetos.
-2. Ejemplos de implementación en Python.
-3. Proyectos desarrollados como parte de las actividades de la asignatura.
-4. Documentación y apuntes adicionales para reforzar el aprendizaje.
+# 2. Análisis de la Evolución del Código
+Etapa Inicial: Versiones __V1__ y __V2__
+En estas versiones, el enfoque principal fue la organización del código. 
+-  En la V1, se agruparon las funciones originales dentro de una clase para evitar el uso de variables globales. 
+-  En la V2, se aplicó el principio de Responsabilidad Única, delegando la lectura y listado de archivos a una clase especializada. 
 
-## Objetivos
+Etapa Avanzada: Versiones ___V3__ y __V4__
+A partir de la V3, se introdujeron cambios para asegurar que el aplicativo funcione en diferentes entorno (Windows/Linux):
+-  Herencia y Polimorfismo (V3): Se implementó una clase MenuBase que estandariza el comportamiento de los menús. Cada submenú hereda esta lógica, permitiendo una navegación fluida y coherente.
+Patrones de Diseño (V4): 
+-  Se utilizó el patrón Singleton para la interfaz de consola, asegurando una gestión centralizada de la pantalla.
+-  Se aplicó el patrón Strategy para la ejecución de scripts, permitiendo que el sistema sea extensible a otros lenguajes en el futuro.
 
-- Aplicar los principios fundamentales de la programación orientada a objetos.
-- Desarrollar soluciones eficientes y estructuradas utilizando Python.
-- Familiarizarse con conceptos como clases, objetos, herencia, polimorfismo y encapsulamiento.
 
-## Instrucciones para el uso
+# 3. Solución al Error de Portabilidad 
+Durante el desarrollo, se identificó que las rutas absolutas fijas causaban fallos en sistemas Windows. Las versiones V3 y V4 integran la solución definitiva:
 
-1. Clona el repositorio:  
-   ```bash
-   git clone https://github.com/snogales-uea/2525-PROGRAMACION-ORIENTADA-A-OBJETOS.git
-   cd 2525-PROGRAMACION-ORIENTADA-A-OBJETOS 
+- Detección Automática de Ruta: Uso de "os.path.dirname(os.path.abspath(__ file __))" para localizar los archivos del proyecto sin importar la carpeta de instalación.
+- Compatibilidad Multiplataforma: Ajuste de los comandos subprocess para invocar correctamente el intérprete de Python tanto en cmd (Windows) como en terminal (Unix).
+- Validación de Existencia: Implementación de chequeos preventivos con os.path.exists() para evitar cierres inesperados del programa.
 
-2. Crear un nuevo repositorio en tu cuenta de GitHub Ve a GitHub: https://github.com/new
 
-3. Cambiar el repositorio remoto del proyecto clonado
-   ```bash
-   git remote remove origin
-   git remote add origin https://github.com/tu-usuario/proyecto-clonado.git
+# 4. Conclusión
+La transición de la V1 a la V4 demuestra cómo la Programación Orientada a Objetos no solo mejora la estética del código, sino que resuelve problemas prácticos de ejecución y mantenimiento. 
 
-4. Subir el proyecto a tu repositorio personal
-   ```bash
-   git push -u origin main
 
+   ```bash 
+   Nota: Esta actividad fue pensada con estos fundamentos e intencion de mejorar el codigo original, ademas de que admito haber resivido ayuda profecional externa la cual sirvio de orientacion para llevar a cabo este comando y comprender mejor la actividad.
