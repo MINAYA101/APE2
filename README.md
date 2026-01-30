@@ -1,6 +1,8 @@
 # Informe de Refactorización Progresiva: Dashboard POO
 Este informe documenta la evolución del aplicativo Dashboard.py, transformándolo de un script procedimental a un sistema avanzado basado en el paradigma de Programación Orientada a Objetos (POO). La progresión se divide en cuatro etapas, integrando mejoras estructurales y soluciones de portabilidad.
 
+
+
 ## 1. Resumen de Versiones
 
 | Versión            	| Enfoque Técnico	        | Estado de Portabilidad	| Conceptos de POO Aplicados                 |
@@ -9,6 +11,7 @@ Este informe documenta la evolución del aplicativo Dashboard.py, transformándo
 | V2: Modularización 	| Separación de E/S      	| Ruta Estática	        | Creación de la clase GestorArchivos (SRP). |
 | V3: Herencia       	| Reutilización de Código	| Ruta Dinámica          | Jerarquía de clases con MenuBase.          |
 | V4: Patrones de Diseño | Arquitectura Robusta   	| Ruta Dinámica          | Patrones Singleton y Strategy.             |
+
 
 
 # 2. Análisis de la Evolución del Código
@@ -25,6 +28,7 @@ Patrones de Diseño (V4):
 -  Se aplicó el patrón Strategy para la ejecución de scripts, permitiendo que el sistema sea extensible a otros lenguajes en el futuro.
 
 
+
 # 3. Solución al Error de Portabilidad 
 Durante el desarrollo, se identificó que las rutas absolutas fijas causaban fallos en sistemas Windows. Las versiones V3 y V4 integran la solución definitiva:
 
@@ -33,9 +37,9 @@ Durante el desarrollo, se identificó que las rutas absolutas fijas causaban fal
 - Validación de Existencia: Implementación de chequeos preventivos con os.path.exists() para evitar cierres inesperados del programa.
 
 
+
 # 4. Conclusión
 La transición de la V1 a la V4 demuestra cómo la Programación Orientada a Objetos no solo mejora la estética del código, sino que resuelve problemas prácticos de ejecución y mantenimiento. 
-
-
+# 
    ```bash 
    Nota: Esta actividad fue pensada con estos fundamentos e intencion de mejorar el codigo original, ademas de que admito haber resivido ayuda profecional externa la cual sirvio de orientacion para llevar a cabo este comando y comprender mejor la actividad.
